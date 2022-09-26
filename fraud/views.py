@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST,HTTP_409_CONFLICT
+from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from paymob.settings import EMAIL_HOST_USER
 from django.core.mail import EmailMultiAlternatives
@@ -471,9 +471,7 @@ def compare_checker( count,value,compare_type ):
         (compare_type=='equal' and count==value) or
         (compare_type=='more than or equal' and count>=value) or
         (compare_type=='less than or equal' and count<=value)):
-        print("compare_checker: True")
         return True
-    print("compare_checker: False")
     return False
 
 def check_in_WL_response(serializer):
@@ -485,7 +483,7 @@ def check_in_WL_response(serializer):
         serializer.validated_data['transaction_status']=True
         serializer.validated_data['message']=message
         serializer.save()
-        return Response({'status':"succes",'message':message},HTTP_200_OK)
+        return Response({'status':"success",'message':message},HTTP_200_OK)
     else:
         return False
 def check_in_GWL_response(serializer):
@@ -497,7 +495,7 @@ def check_in_GWL_response(serializer):
         serializer.validated_data['transaction_status']=True
         serializer.validated_data['message']=message
         serializer.save()
-        return Response({'status':"succes",'message':message},HTTP_200_OK)
+        return Response({'status':"success",'message':message},HTTP_200_OK)
     else:
         return False
 def check_in_GBL_response(serializer): 
@@ -559,9 +557,7 @@ def check_conditions(conditions,serializer):
     """
     serializer.is_valid(raise_exception=True)
     count_conditions=len(conditions)
-    print ("count_conditions",count_conditions)
     for condition in conditions :
-        print("condition type",condition.type)
         if condition.type=='VPN':
             ip=serializer.validated_data['ip']
             if(is_VPN(ip)==True):
@@ -571,19 +567,16 @@ def check_conditions(conditions,serializer):
                 break
         if condition.type=='amount':
             amount=serializer.validated_data['amount']
-            print("amount",amount,"value",condition.value,"compare_type",condition.compare_type)
             if (compare_checker(amount,condition.value,condition.compare_type)):
                 count_conditions-=1
                 continue
             else:
                 break
-        
         if condition.type=='num refuse transaction with card number today':
             card_num=serializer.validated_data['card_num']
             #count false with card today
             count=Transaction.objects.filter(card_num=card_num,transaction_status=False,created_at__date=datetime.now().date()).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
@@ -601,7 +594,6 @@ def check_conditions(conditions,serializer):
             phone=serializer.validated_data['phone']
             #count false with phone today
             count=Transaction.objects.filter(phone=phone,transaction_status=False,created_at__date=datetime.now().date()).count()
-            print("count",count)
             if (compare_checker(count,condition.value,condition.compare_type)):
                 count_conditions-=1
                 continue
@@ -621,18 +613,15 @@ def check_conditions(conditions,serializer):
             #count false with card today
             count=Transaction.objects.filter(ip=ip,transaction_status=False,created_at__date=datetime.now().date()).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
-                break
-        
+                break   
         if condition.type=='num transaction with card number today':
             card_num=serializer.validated_data['card_num']
             #count false with card today
             count=Transaction.objects.filter(card_num=card_num,created_at__date=datetime.now().date()).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
@@ -672,14 +661,12 @@ def check_conditions(conditions,serializer):
                 count_conditions-=1
                 continue
             else:
-                break
-        
+                break    
         if condition.type=='num refuse transaction with card number month':
             card_num=serializer.validated_data['card_num']
             #count false with card month
             count=Transaction.objects.filter(card_num=card_num,transaction_status=False,created_at__month=datetime.now().month).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
@@ -716,18 +703,15 @@ def check_conditions(conditions,serializer):
             #count false with card month
             count=Transaction.objects.filter(ip=ip,transaction_status=False,created_at__month=datetime.now().month).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
                 break
-        
         if condition.type=='num transaction with card number month':
             card_num=serializer.validated_data['card_num']
             #count transactions with card_num on current month
             count=Transaction.objects.filter(card_num=card_num,created_at__month=datetime.now().month).count()
             if (compare_checker(count,condition.value,condition.compare_type)): 
-                print("compare_checker")
                 count_conditions-=1
                 continue
             else:
@@ -768,20 +752,22 @@ def check_conditions(conditions,serializer):
                 continue
             else:
                 break
-        
     return int(count_conditions)
    
    
-   
-    # {
-#     "name":"moahmed",
-#     "card_num":"66",
-#     "phone":"012",
-#     "email":"a@asd.com",
-#     "ip":"",
-#     "merchant":"khaled",
-#     "amount":"1500"
-# }
+"""
+fake transaction data for test
+{
+    "name":"moahmed",
+    "card_num":"66",
+    "phone:"012",
+    "email:"a@asd.com",
+    "ip":"8.8.8.8",
+    "merchant":"khaled",
+    "amount":"1500"
+}
+"""
+
 def add_review(data):
     serializer = ReviewSerializer(data=data)
     serializer.is_valid(raise_exception=True)
@@ -808,7 +794,6 @@ class Send_transaction(APIView):
         serializer = TransctionSerializer(data=request.data)
         
         if serializer.is_valid():
-            print ("send_transaction")
             response=check_in_WL_response(serializer)
             if response!=False: #found in WL
                 return response
@@ -824,7 +809,6 @@ class Send_transaction(APIView):
             
             rules=Rule.objects.filter(active=True).order_by('priority')
             if rules.count()>0:
-                print("rule",rules)
                 rule_name=""
                 result=['True','No rule applied']
                 for rule in rules :
@@ -832,7 +816,6 @@ class Send_transaction(APIView):
                     conditions=rule.condition.all()
                     conditions=conditions.filter(active=True)
                     count_conditions=check_conditions(conditions,serializer)
-                    print("count_conditions222 :",count_conditions)
                     if count_conditions==0:
                         actions=rule.action.all()
                         actions=actions.filter(active=True)
@@ -859,7 +842,6 @@ class Send_transaction(APIView):
             else:
                 serializer.validated_data['transaction_status']=True
                 message=serializer.validated_data['message']="Transiction accepted *no rules found"
-                print("message",message)
                 serializer.save()
                 return Response({'status':"success","message":message},HTTP_200_OK)
         else:
@@ -885,9 +867,6 @@ class Add_to_blacklist(generics.ListCreateAPIView):
             message=result[1]
             found=result[2]
             object=result[3]
-            print("status",status)
-            print("message",message)
-            print("found",found)
             if(found==True and status==False): #found in BL but not active
                 return Response({"message":"object found in BL and "+ activeObject(object)+" -","status":"success"},HTTP_200_OK)
             elif(found==True and status==True): #found in BL and active
@@ -967,7 +946,6 @@ class Add_to_global_whitelist(generics.ListCreateAPIView):
 
 def generate_password():
     return ''.join(random.choice(string.ascii_uppercase+ string.digits +string.ascii_lowercase) for _ in range(8))
-    
     
 class Change_password(APIView):
     serializer_class=ChangePasswordSerializer

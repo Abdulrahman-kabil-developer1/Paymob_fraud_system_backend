@@ -20,5 +20,3 @@ urlpatterns = [
     
 ]
 
-
-#block only -(block 4 identfire)- 
