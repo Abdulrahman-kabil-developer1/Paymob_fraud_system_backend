@@ -7,6 +7,8 @@ admin.AdminSite.index_title = 'Paymob Fraud Detection'
 
 class TransactionAdmin(admin.ModelAdmin):
     list_display=('amount','transaction_status','message','rule','name','merchant','email','phone','card_num')
+    def has_change_permission(self, request, obj=None):
+        return False
     
 class GlobalList(admin.ModelAdmin):
     list_display=('type','active','name','email','phone','card_num')
@@ -17,6 +19,12 @@ class ActionAdmin(admin.ModelAdmin):
     list_display=('name','active','description')
     list_editable=('active','description')
     list_display_links=('name',)
+    def has_delete_permission(self, request, obj=None):
+        return False
+    def has_add_permission(self, request, obj=None):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return False
 
 class List(GlobalList):
     fields=GlobalList.get_list_display(self=GlobalList,request=None)

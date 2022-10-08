@@ -143,6 +143,28 @@ def createToken(sender,instance,created,**kwargs):
     if created:
         Token.objects.create(user=instance)
 
+#add actions to action model if not exist
+	
+actions=[
+    ["accept transaction","only accept transaction"],
+    ["block transaction","block transaction only"],
+    ["block client","block client name"],
+    ["block phone","block client phone"],
+    ["block card number","block client card number"],
+    ["block email","block client email"],
+    ["block ip","block client ip"],
+    ["global block client","add client to global black list"],
+    ["global block phone","add phone to global black list"],
+    ["global block card number","add card number to global black list"],
+    ["global block email","add email to global black list"],
+    ["global block ip","add ip to global black list"],
+    ["add to review","add transaction To review by risk team"],
+    ]
+
+def add_actions():
+    for action in actions:
+        if not Action.objects.filter(name=action[0]).exists():
+            Action.objects.create(name=action[0],description=action[1],active=True)
 
 
 #client (card num-email-phone- ip)
