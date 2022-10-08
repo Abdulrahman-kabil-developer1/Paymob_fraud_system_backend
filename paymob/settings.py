@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =(bool(int(os.environ.get('DEBUG',1))))
 
-ALLOWED_HOSTS =os.environ.get('ALLOWED_HOSTS').split(' ')
+ALLOWED_HOSTS =ALLOWED_HOSTS = ['*']
 #rest framwork
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -80,11 +80,11 @@ WSGI_APPLICATION = 'paymob.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME'),
-        'USER': os.getenv('DATABASE_USER'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
-        'PORT': os.getenv('DATABASE_PORT'),
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
