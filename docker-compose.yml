@@ -1,6 +1,12 @@
 version: '3.8' 
+volumes:
+  db:
+  pgadmin-data:
+networks:
+  main:
 services: 
   db:
+    container_name: db1
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
@@ -8,13 +14,15 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    networks:
+      - main
     
   backend:  
     build: .
     container_name: backend_only
     ports:
       - 8000:8000
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c " python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/back # Mount the current directory as a volume
     environment:
@@ -23,5 +31,22 @@ services:
       POSTGRES_DB: postgres
     # network_mode: host
     restart: always
+    networks:
+      - main
     depends_on:
       - db
+      - pgadmin
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - main

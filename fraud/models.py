@@ -1,9 +1,12 @@
 from enum import unique
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,post_migrate,pre_migrate
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+
+import fraud
+from fraud.apps import FraudConfig
 # Create your models here.
 
 data_type=[('ip','ip'),('name','name'),('email','email'),('phone','phone'),('card_num','card_num')]
@@ -143,8 +146,8 @@ def createToken(sender,instance,created,**kwargs):
     if created:
         Token.objects.create(user=instance)
 
-#add actions to action model if not exist
-	
+
+#defualte actions  
 actions=[
     ["accept transaction","only accept transaction"],
     ["block transaction","block transaction only"],
@@ -159,12 +162,15 @@ actions=[
     ["global block email","add email to global black list"],
     ["global block ip","add ip to global black list"],
     ["add to review","add transaction To review by risk team"],
-    ]
+        ]
 
-def add_actions():
+def add_actions(**kwargs):
     for action in actions:
         if not Action.objects.filter(name=action[0]).exists():
             Action.objects.create(name=action[0],description=action[1],active=True)
+    
+
+
 
 
 #client (card num-email-phone- ip)
